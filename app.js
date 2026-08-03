@@ -61,7 +61,15 @@ else {
     ride.speed = (18 + Math.random() * 5).toFixed(1);
 
     // Distance based on speed
-    ride.distance += Number(ride.speed) / 3600 * 20;
+    if (ride.mode === "Test Mode") {
+
+    ride.distance += Number(ride.speed) / 3600 * 200;
+
+} else {
+
+    ride.distance += Number(ride.speed) / 3600;
+
+}
 
     ride.seconds++;
 
