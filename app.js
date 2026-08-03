@@ -101,7 +101,8 @@ function updateDisplay() {
     // Progress bar
     let percent =
         (ride.distance / ride.totalMiles) * 100;
-
+document.getElementById("racePercent").innerHTML =
+    percent.toFixed(1) + "%";
     document.getElementById("progress").style.width =
         percent + "%";
 
