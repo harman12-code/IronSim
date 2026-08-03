@@ -66,6 +66,7 @@ else {
     ride.seconds++;
 
     updateDisplay();
+updateCourseSection();
 }
 
 
