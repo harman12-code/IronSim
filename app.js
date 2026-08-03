@@ -143,3 +143,39 @@ function connectBike() {
     }, 2000);
 
 }
+function updateCourseSection() {
+
+    let section = "Starting Line";
+    let terrain = "Flat";
+    let wind = "Variable";
+
+    if (ride.distance >= 20 && ride.distance < 60) {
+
+        section = "Blackwater Roads";
+        terrain = "Rolling";
+        wind = "Coastal";
+
+    }
+
+    else if (ride.distance >= 60 && ride.distance < 90) {
+
+        section = "Eastern Shore";
+        terrain = "Flat";
+        wind = "Open Exposure";
+
+    }
+
+    else if (ride.distance >= 90) {
+
+        section = "Return to Cambridge";
+        terrain = "Flat";
+        wind = "Variable";
+
+    }
+
+
+    document.getElementById("section").innerHTML = section;
+    document.getElementById("terrain").innerHTML = terrain;
+    document.getElementById("wind").innerHTML = wind;
+
+}
