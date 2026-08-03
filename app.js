@@ -29,7 +29,7 @@ function simulateRide() {
     ride.speed = (18 + Math.random() * 5).toFixed(1);
 
     // Distance based on speed
-    ride.distance += ride.speed / 3600;
+    ride.distance += Number(ride.speed) / 3600;
 
     ride.seconds++;
 
