@@ -1,59 +1,172 @@
-IronSim
-    
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IronSim</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #111827;
+            color: #ffffff;
+            text-align: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
 
+        h1 {
+            font-size: 42px;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+        }
 
+        p {
+            color: #9CA3AF;
+            margin-top: 0;
+        }
 
+        .card {
+            background: #1F2937;
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px auto;
+            max-width: 550px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
 
-IRONSIM
-Virtual Ironman Training Simulator
+        .metric {
+            font-size: 20px;
+            margin: 12px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #374151;
+            padding-bottom: 8px;
+        }
 
+        .metric span {
+            font-weight: bold;
+            color: #60A5FA;
+        }
 
-    ⚡ Power: -- watts
-    🚴 Cadence: -- RPM
-    💨 Speed: -- MPH
-    📍 Distance: 0 miles
-    🏁 Mile Marker: 0 / 112
+        #progressBar {
+            width: 100%;
+            height: 18px;
+            background: #374151;
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
 
-    📍 Current Section: Starting Line
-    🌎 Terrain: Flat
-    💨 Wind: Variable
+        #progress {
+            width: 0%;
+            height: 100%;
+            background: #3B82F6;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
 
-    📊 Progress:
-    
-        
-    
+        select {
+            background: #374151;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+        }
 
-    ⏱️ Finish Estimate: Calculating...
-    📍 Course: Ironman Maryland
+        button {
+            font-size: 18px;
+            font-weight: bold;
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            margin: 10px 5px;
+            cursor: pointer;
+            background: #2563EB;
+            color: white;
+            transition: background 0.2s;
+        }
 
-    
-        🎮 Mode:
-        
-            Race Mode
-            Training Mode
-            FTP Test
-            Ghost Rider
-            Explore Course
-            Test Mode
-        
-    
+        button:hover {
+            background: #1D4ED8;
+        }
 
-    👻 Ghost Status: Inactive
+        .raceView {
+            background: #1F2937;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 550px;
+            margin: 20px auto;
+        }
 
-    🚴 Bike Connection: Not Connected
-    📡 Data Stream: Offline
-    ⚡ Power Source: Estimated
-    ⚙️ Resistance: 5
+        #rider {
+            font-size: 60px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
 
-    Connect Schwinn IC4
-    Start Ride
+<body>
 
-    ⏱️ Time: 0:00
+    <h1>IRONSIM</h1>
+    <p>Virtual Ironman Training Simulator</p>
 
+    <div class="card">
+        <div class="metric">⚡ Power: <span id="power">--</span> watts</div>
+        <div class="metric">🚴 Cadence: <span id="cadence">--</span> RPM</div>
+        <div class="metric">💨 Speed: <span id="speed">--</span> MPH</div>
+        <div class="metric">📍 Distance: <span id="distance">0</span> miles</div>
+        <div class="metric">🏁 Mile Marker: <span id="mile">0</span> / 112</div>
 
+        <div class="metric">📍 Current Section: <span id="section">Starting Line</span></div>
+        <div class="metric">🌎 Terrain: <span id="terrain">Flat</span></div>
+        <div class="metric">💨 Wind: <span id="wind">Variable</span></div>
 
-    🚴 Rider View
-    🚴
-    🏁 Race Progress: 0%
+        <div class="metric">📊 Progress:</div>
+        <div id="progressBar">
+            <div id="progress"></div>
+        </div>
+
+        <div class="metric">⏱️ Finish Estimate: <span id="finish">Calculating...</span></div>
+        <div class="metric">📍 Course: <span>Ironman Maryland</span></div>
+
+        <div class="metric">
+            🎮 Mode:
+            <select id="mode">
+                <option>Race Mode</option>
+                <option>Training Mode</option>
+                <option>FTP Test</option>
+                <option>Ghost Rider</option>
+                <option>Explore Course</option>
+                <option>Test Mode</option>
+            </select>
+        </div>
+
+        <div class="metric">👻 Ghost Status: <span id="ghostStatus">Inactive</span></div>
+
+        <div class="metric">🚴 Bike Connection: <span id="bikeStatus">Not Connected</span></div>
+        <div class="metric">📡 Data Stream: <span id="dataStatus">Offline</span></div>
+        <div class="metric">⚡ Power Source: <span id="powerSource">Estimated</span></div>
+        <div class="metric">⚙️ Resistance: <span id="resistance">5</span></div>
+
+        <button onclick="connectBike()">Connect Schwinn IC4</button>
+        <button onclick="startRide()">Start Ride</button>
+
+        <div class="metric">⏱️ Time: <span id="time">0:00</span></div>
+    </div>
+
+    <div class="raceView">
+        <h2>🚴 Rider View</h2>
+        <div id="rider">🚴</div>
+        <div class="metric">🏁 Race Progress: <span id="racePercent">0%</span></div>
+    </div>
+
+    <!-- Core Scripts Loaded in Order -->
+    <script src="bike.js"></script>
+    <script src="course.js"></script>
+    <script src="ghost.js"></script>
+    <script src="app.js"></script>
+
+</body>
+</html>
