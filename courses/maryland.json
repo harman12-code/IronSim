@@ -2,19 +2,34 @@
   "name": "Ironman Maryland",
   "distanceMiles": 112,
   "location": "Cambridge, Maryland",
-  "elevationFeet": 1500,
   "segments": [
     {
-      "mile": 0,
-      "name": "Start"
+      "start": 0,
+      "end": 20,
+      "name": "Cambridge Start",
+      "elevation": "Flat",
+      "wind": "Variable"
     },
     {
-      "mile": 56,
-      "name": "Halfway Point"
+      "start": 20,
+      "end": 60,
+      "name": "Blackwater Roads",
+      "elevation": "Rolling",
+      "wind": "Coastal"
     },
     {
-      "mile": 112,
-      "name": "Finish"
+      "start": 60,
+      "end": 90,
+      "name": "Eastern Shore",
+      "elevation": "Flat",
+      "wind": "Open Exposure"
+    },
+    {
+      "start": 90,
+      "end": 112,
+      "name": "Return to Cambridge",
+      "elevation": "Flat",
+      "wind": "Variable"
     }
   ]
 }
