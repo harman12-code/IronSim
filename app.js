@@ -14,7 +14,16 @@ const ride = {
 
 
 function startRide() {
+
     ride.running = true;
+
+    let selectedMode =
+        document.getElementById("mode").value;
+
+    ride.mode = selectedMode;
+
+    console.log("Mode:", ride.mode);
+
 }
 
 
