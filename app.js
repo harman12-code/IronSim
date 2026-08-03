@@ -1,4 +1,4 @@
-// IronSim Core Engine
+// app.js - IronSim Core Engine
 
 const ride = {
     power: 0,
@@ -12,163 +12,88 @@ const ride = {
     mode: "Race Mode"
 };
 
-
 function startRide() {
-
     ride.running = true;
 
-    let selectedMode =
-        document.getElementById("mode").value;
-
-    ride.mode = selectedMode;
-
-    console.log("Mode:", ride.mode);
-
-}
-
-
-function simulateRide() {
-
-    if (!ride.running) {
-        return;
+    const modeEl = document.getElementById("mode");
+    if (modeEl) {
+        ride.mode = modeEl.value;
     }
 
-    // Simulated bike data
+    console.log("Ride started in mode:", ride.mode);
+}
+
+function simulateRide() {
+    if (!ride.running) return;
+
+    // Simulated power generation based on mode
     if (ride.mode === "Training Mode") {
+        ride.power = 200;
+    } else if (ride.mode === "FTP Test") {
+        ride.power = Math.floor(250 + Math.random() * 50);
+    } else if (ride.mode === "Ghost Rider") {
+        ride.power = Math.floor(220 + Math.random() * 40);
+    } else {
+        ride.power = Math.floor(180 + Math.random() * 80);
+    }
 
-    ride.power = 200;
-
-}
-
-else if (ride.mode === "FTP Test") {
-
-    ride.power = Math.floor(250 + Math.random() * 50);
-
-}
-
-else if (ride.mode === "Ghost Rider") {
-
-    ride.power = Math.floor(220 + Math.random() * 40);
-
-}
-
-else {
-
-    ride.power = Math.floor(180 + Math.random() * 80);
-
-};
     ride.cadence = Math.floor(75 + Math.random() * 20);
     ride.speed = (18 + Math.random() * 5).toFixed(1);
 
-    // Distance based on speed
+    // Distance multiplier for fast testing
     if (ride.mode === "Test Mode") {
-
-    ride.distance += Number(ride.speed) / 3600 * 200;
-
-} else {
-
-    ride.distance += Number(ride.speed) / 3600;
-
-}
+        ride.distance += (Number(ride.speed) / 3600) * 200;
+    } else {
+        ride.distance += Number(ride.speed) / 3600;
+    }
 
     ride.seconds++;
 
+    // Modular updates
     updateDisplay();
-updateCourseSection();
+    if (typeof updateCourseSection === "function") updateCourseSection();
+    if (typeof updateGhostRider === "function") updateGhostRider();
 }
-
 
 function updateDisplay() {
+    const powerEl = document.getElementById("power");
+    const cadenceEl = document.getElementById("cadence");
+    const speedEl = document.getElementById("speed");
+    const distanceEl = document.getElementById("distance");
+    const mileEl = document.getElementById("mile");
+    const finishEl = document.getElementById("finish");
+    const timeEl = document.getElementById("time");
+    const raceDisplay = document.getElementById("racePercent");
+    const progressBar = document.getElementById("progress");
 
-    document.getElementById("power").innerHTML =
-        ride.power;
+    if (powerEl) powerEl.innerText = ride.power;
+    if (cadenceEl) cadenceEl.innerText = ride.cadence;
+    if (speedEl) speedEl.innerText = ride.speed;
+    if (distanceEl) distanceEl.innerText = ride.distance.toFixed(2);
+    if (mileEl) mileEl.innerText = ride.distance.toFixed(1);
 
-    document.getElementById("cadence").innerHTML =
-        ride.cadence;
-
-    document.getElementById("speed").innerHTML =
-        ride.speed;
-
-    document.getElementById("distance").innerHTML =
-        ride.distance.toFixed(2);
-
-
-    // Mile marker
-    document.getElementById("mile").innerHTML =
-        ride.distance.toFixed(1);
-
-
-    // Progress bar
-    let percent =
-    Math.min((ride.distance / ride.totalMiles) * 100, 100);
-
-let raceDisplay = document.getElementById("racePercent");
-
-if (raceDisplay) {
-    raceDisplay.innerHTML =
-        percent.toFixed(1) + "%";
-}
-
-
-    // Finish prediction
-    let hours =
-        ride.totalMiles / ride.speed;
-
-    let finishMinutes =
-        Math.floor(hours * 60);
-
-    document.getElementById("finish").innerHTML =
-    finishMinutes + " min";
-
-
-    // Timer
-    let minutes =
-        Math.floor(ride.seconds / 60);
-
-    let seconds =
-        ride.seconds % 60;
-
-    document.getElementById("time").innerHTML =
-        minutes + ":" + seconds.toString().padStart(2,"0");
-}
-
-
-setInterval(simulateRide,1000);
-
-}
-function updateCourseSection() {
-
-    let section = "Starting Line";
-    let terrain = "Flat";
-    let wind = "Variable";
-
-    if (ride.distance >= 20 && ride.distance < 60) {
-
-        section = "Blackwater Roads";
-        terrain = "Rolling";
-        wind = "Coastal";
-
+    // Progress percentage & Bar width
+    const percent = Math.min((ride.distance / ride.totalMiles) * 100, 100);
+    if (raceDisplay) raceDisplay.innerText = percent.toFixed(1) + "%";
+    if (progressBar) {
+        progressBar.style.width = percent + "%";
+        progressBar.style.backgroundColor = "#3B82F6"; // Blue fill
     }
 
-    else if (ride.distance >= 60 && ride.distance < 90) {
-
-        section = "Eastern Shore";
-        terrain = "Flat";
-        wind = "Open Exposure";
-
+    // Finish time prediction (Minutes)
+    if (Number(ride.speed) > 0) {
+        const hours = ride.totalMiles / Number(ride.speed);
+        const finishMinutes = Math.floor(hours * 60);
+        if (finishEl) finishEl.innerText = finishMinutes + " min";
     }
 
-    else if (ride.distance >= 90) {
-
-        section = "Return to Cambridge";
-        terrain = "Flat";
-        wind = "Variable";
-
+    // Main Timer
+    const minutes = Math.floor(ride.seconds / 60);
+    const seconds = ride.seconds % 60;
+    if (timeEl) {
+        timeEl.innerText = `${minutes}:${seconds.toString().padStart(2, "0")}`;
     }
-
-
-    document.getElementById("section").innerHTML = section;
-    document.getElementById("terrain").innerHTML = terrain;
-    document.getElementById("wind").innerHTML = wind;
-
 }
+
+// Game Loop
+setInterval(simulateRide, 1000);
