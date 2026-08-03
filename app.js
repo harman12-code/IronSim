@@ -34,7 +34,29 @@ function simulateRide() {
     }
 
     // Simulated bike data
+    if (ride.mode === "Training Mode") {
+
+    ride.power = 200;
+
+}
+
+else if (ride.mode === "FTP Test") {
+
+    ride.power = Math.floor(250 + Math.random() * 50);
+
+}
+
+else if (ride.mode === "Ghost Rider") {
+
+    ride.power = Math.floor(220 + Math.random() * 40);
+
+}
+
+else {
+
     ride.power = Math.floor(180 + Math.random() * 80);
+
+};
     ride.cadence = Math.floor(75 + Math.random() * 20);
     ride.speed = (18 + Math.random() * 5).toFixed(1);
 
