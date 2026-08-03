@@ -8,7 +8,8 @@ const ride = {
     seconds: 0,
     running: false,
     course: "Ironman Maryland",
-    totalMiles: 112
+    totalMiles: 112,
+    mode: "Race Mode"
 };
 
 
