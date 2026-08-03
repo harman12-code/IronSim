@@ -20,10 +20,7 @@
             letter-spacing: 2px;
         }
 
-        p {
-            color: #9CA3AF;
-            margin-top: 0;
-        }
+        p { color: #9CA3AF; margin-top: 0; }
 
         .card {
             background: #1F2937;
@@ -35,7 +32,7 @@
         }
 
         .metric {
-            font-size: 20px;
+            font-size: 18px;
             margin: 12px 0;
             display: flex;
             justify-content: space-between;
@@ -44,14 +41,11 @@
             padding-bottom: 8px;
         }
 
-        .metric span {
-            font-weight: bold;
-            color: #60A5FA;
-        }
+        .metric span { font-weight: bold; color: #60A5FA; }
 
         #progressBar {
             width: 100%;
-            height: 18px;
+            height: 16px;
             background: #374151;
             border-radius: 10px;
             margin: 15px 0;
@@ -85,11 +79,6 @@
             cursor: pointer;
             background: #2563EB;
             color: white;
-            transition: background 0.2s;
-        }
-
-        button:hover {
-            background: #1D4ED8;
         }
 
         .raceView {
@@ -100,9 +89,12 @@
             margin: 20px auto;
         }
 
-        #rider {
-            font-size: 60px;
-            margin: 10px 0;
+        canvas {
+            width: 100%;
+            height: 120px;
+            background: #111827;
+            border-radius: 12px;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -120,7 +112,7 @@
         <div class="metric">🏁 Mile Marker: <span id="mile">0</span> / 112</div>
 
         <div class="metric">📍 Current Section: <span id="section">Starting Line</span></div>
-        <div class="metric">🌎 Terrain: <span id="terrain">Flat</span></div>
+        <div class="metric">🌎 Terrain & Grade: <span id="terrain">Flat (0.0%)</span></div>
         <div class="metric">💨 Wind: <span id="wind">Variable</span></div>
 
         <div class="metric">📊 Progress:</div>
@@ -129,7 +121,6 @@
         </div>
 
         <div class="metric">⏱️ Finish Estimate: <span id="finish">Calculating...</span></div>
-        <div class="metric">📍 Course: <span>Ironman Maryland</span></div>
 
         <div class="metric">
             🎮 Mode:
@@ -138,35 +129,66 @@
                 <option>Training Mode</option>
                 <option>FTP Test</option>
                 <option>Ghost Rider</option>
-                <option>Explore Course</option>
                 <option>Test Mode</option>
             </select>
         </div>
 
         <div class="metric">👻 Ghost Status: <span id="ghostStatus">Inactive</span></div>
-
-        <div class="metric">🚴 Bike Connection: <span id="bikeStatus">Not Connected</span></div>
-        <div class="metric">📡 Data Stream: <span id="dataStatus">Offline</span></div>
-        <div class="metric">⚡ Power Source: <span id="powerSource">Estimated</span></div>
-        <div class="metric">⚙️ Resistance: <span id="resistance">5</span></div>
-
         <button onclick="connectBike()">Connect Schwinn IC4</button>
         <button onclick="startRide()">Start Ride</button>
-
         <div class="metric">⏱️ Time: <span id="time">0:00</span></div>
     </div>
 
     <div class="raceView">
-        <h2>🚴 Rider View</h2>
-        <div id="rider">🚴</div>
+        <h2>🚵 Course Profile & Live Rider</h2>
+        <canvas id="elevationCanvas" width="500" height="120"></canvas>
         <div class="metric">🏁 Race Progress: <span id="racePercent">0%</span></div>
     </div>
 
-    <!-- Core Scripts Loaded in Order -->
     <script src="bike.js"></script>
     <script src="course.js"></script>
     <script src="ghost.js"></script>
     <script src="app.js"></script>
+
+    <script>
+    function drawElevationProfile() {
+        const canvas = document.getElementById("elevationCanvas");
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        const w = canvas.width;
+        const h = canvas.height;
+
+        ctx.clearRect(0, 0, w, h);
+
+        // Draw Elevation Curve
+        ctx.beginPath();
+        ctx.moveTo(0, h - 20);
+        for (let x = 0; x <= w; x += 10) {
+            let simDist = (x / w) * 112;
+            let grade = typeof getCurrentGrade === "function" ? getCurrentGrade(simDist) : 0;
+            let y = h - 20 - (grade * 15);
+            ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = "#60A5FA";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // Draw Rider Dot on Canvas
+        if (typeof ride !== "undefined") {
+            let riderX = (ride.distance / ride.totalMiles) * w;
+            let riderGrade = typeof getCurrentGrade === "function" ? getCurrentGrade(ride.distance) : 0;
+            let riderY = h - 20 - (riderGrade * 15);
+
+            ctx.beginPath();
+            ctx.arc(riderX, riderY, 8, 0, Math.PI * 2);
+            ctx.fillStyle = "#EF4444"; // Red rider dot
+            ctx.fill();
+            ctx.strokeStyle = "#FFFFFF";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+    }
+    </script>
 
 </body>
 </html>
