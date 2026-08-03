@@ -1,0 +1,20 @@
+{
+  "name": "Ironman Maryland",
+  "distanceMiles": 112,
+  "location": "Cambridge, Maryland",
+  "elevationFeet": 1500,
+  "segments": [
+    {
+      "mile": 0,
+      "name": "Start"
+    },
+    {
+      "mile": 56,
+      "name": "Halfway Point"
+    },
+    {
+      "mile": 112,
+      "name": "Finish"
+    }
+  ]
+}
