@@ -96,6 +96,19 @@
             border-radius: 12px;
             margin-top: 10px;
         }
+
+        #logBox {
+            background: #000;
+            color: #10B981;
+            font-family: monospace;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: left;
+            margin-top: 15px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 
@@ -133,9 +146,13 @@
             </select>
         </div>
 
-        <div class="metric">👻 Ghost Status: <span id="ghostStatus">Inactive</span></div>
-        <button onclick="connectBike()">Connect Schwinn IC4</button>
+        <div class="metric">🚴 Bike Status: <span id="bikeStatus">Disconnected</span></div>
+
+        <button id="connectBtn">Connect Schwinn IC4</button>
         <button onclick="startRide()">Start Ride</button>
+
+        <div id="logBox">System initialized. Click Connect Schwinn IC4...</div>
+
         <div class="metric">⏱️ Time: <span id="time">0:00</span></div>
     </div>
 
@@ -151,6 +168,23 @@
     <script src="app.js"></script>
 
     <script>
+    function logMsg(msg) {
+        const box = document.getElementById("logBox");
+        if (box) {
+            box.innerText = msg + "\n" + box.innerText;
+        }
+        console.log(msg);
+    }
+
+    document.getElementById("connectBtn").addEventListener("click", function() {
+        logMsg("Button tapped!");
+        if (typeof connectBike === "function") {
+            connectBike();
+        } else {
+            logMsg("ERROR: connectBike function not found in bike.js!");
+        }
+    });
+
     function drawElevationProfile() {
         const canvas = document.getElementById("elevationCanvas");
         if (!canvas) return;
@@ -160,7 +194,6 @@
 
         ctx.clearRect(0, 0, w, h);
 
-        // Draw Elevation Curve
         ctx.beginPath();
         ctx.moveTo(0, h - 20);
         for (let x = 0; x <= w; x += 10) {
@@ -173,7 +206,6 @@
         ctx.lineWidth = 3;
         ctx.stroke();
 
-        // Draw Rider Dot on Canvas
         if (typeof ride !== "undefined") {
             let riderX = (ride.distance / ride.totalMiles) * w;
             let riderGrade = typeof getCurrentGrade === "function" ? getCurrentGrade(ride.distance) : 0;
@@ -181,7 +213,7 @@
 
             ctx.beginPath();
             ctx.arc(riderX, riderY, 8, 0, Math.PI * 2);
-            ctx.fillStyle = "#EF4444"; // Red rider dot
+            ctx.fillStyle = "#EF4444";
             ctx.fill();
             ctx.strokeStyle = "#FFFFFF";
             ctx.lineWidth = 2;
