@@ -7,16 +7,13 @@ const ride = {
     distance: 0,
     seconds: 0,
     running: false,
-    course: "Ironman Maryland"
+    course: "Ironman Maryland",
+    totalMiles: 112
 };
 
 
 function startRide() {
-
     ride.running = true;
-
-    console.log("Ride Started");
-
 }
 
 
@@ -26,13 +23,15 @@ function simulateRide() {
         return;
     }
 
-    // Temporary simulated bike data
+    // Simulated bike data
     ride.power = Math.floor(180 + Math.random() * 80);
     ride.cadence = Math.floor(75 + Math.random() * 20);
     ride.speed = (18 + Math.random() * 5).toFixed(1);
 
-    ride.distance += 0.01;
-    ride.seconds += 1;
+    // Distance based on speed
+    ride.distance += ride.speed / 3600;
+
+    ride.seconds++;
 
     updateDisplay();
 }
@@ -41,23 +40,52 @@ function simulateRide() {
 function updateDisplay() {
 
     document.getElementById("power").innerHTML =
-        ride.power + " watts";
+        ride.power;
 
     document.getElementById("cadence").innerHTML =
-        ride.cadence + " RPM";
+        ride.cadence;
 
     document.getElementById("speed").innerHTML =
-        ride.speed + " MPH";
+        ride.speed;
 
     document.getElementById("distance").innerHTML =
-        ride.distance.toFixed(2) + " miles";
+        ride.distance.toFixed(2);
 
-    let minutes = Math.floor(ride.seconds / 60);
-    let seconds = ride.seconds % 60;
+
+    // Mile marker
+    document.getElementById("mile").innerHTML =
+        ride.distance.toFixed(1);
+
+
+    // Progress bar
+    let percent =
+        (ride.distance / ride.totalMiles) * 100;
+
+    document.getElementById("progress").style.width =
+        percent + "%";
+
+
+    // Finish prediction
+    let hours =
+        ride.totalMiles / ride.speed;
+
+    let finishMinutes =
+        Math.floor(hours * 60);
+
+    document.getElementById("finish").innerHTML =
+        finishMinutes + " minutes";
+
+
+    // Timer
+    let minutes =
+        Math.floor(ride.seconds / 60);
+
+    let seconds =
+        ride.seconds % 60;
 
     document.getElementById("time").innerHTML =
-        minutes + ":" + seconds.toString().padStart(2, "0");
+        minutes + ":" + seconds.toString().padStart(2,"0");
 }
 
 
-setInterval(simulateRide, 1000);
+setInterval(simulateRide,1000);
