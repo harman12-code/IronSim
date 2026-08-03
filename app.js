@@ -73,7 +73,7 @@ function updateDisplay() {
         Math.floor(hours * 60);
 
     document.getElementById("finish").innerHTML =
-        finishMinutes + " minutes";
+    finishMinutes + " min";
 
 
     // Timer
