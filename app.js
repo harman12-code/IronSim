@@ -121,3 +121,16 @@ function updateDisplay() {
 
 
 setInterval(simulateRide,1000);
+function connectBike() {
+
+    document.getElementById("bikeStatus").innerHTML =
+        "Searching...";
+
+    setTimeout(function(){
+
+        document.getElementById("bikeStatus").innerHTML =
+            "Simulator Mode";
+
+    }, 2000);
+
+}
