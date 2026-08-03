@@ -100,11 +100,14 @@ function updateDisplay() {
 
     // Progress bar
     let percent =
-        (ride.distance / ride.totalMiles) * 100;
-document.getElementById("racePercent").innerHTML =
-    percent.toFixed(1) + "%";
-    document.getElementById("progress").style.width =
-        percent + "%";
+    (ride.distance / ride.totalMiles) * 100;
+
+let raceDisplay = document.getElementById("racePercent");
+
+if (raceDisplay) {
+    raceDisplay.innerHTML =
+        percent.toFixed(1) + "%";
+}
 
 
     // Finish prediction
