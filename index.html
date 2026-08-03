@@ -1,177 +1,59 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>IronSim</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+IronSim
+    
 
-    <style>
-        button {
-    font-size: 24px;
-    padding: 15px 30px;
-    border-radius: 15px;
-    border: none;
-    margin-top: 20px;
-}
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background: #111827;
-            color: white;
-            text-align: center;
-            padding: 40px 20px;
-        }
+    
 
-        h1 {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
 
-        .card {
-            background: #1f2937;
-            border-radius: 20px;
-            padding: 20px;
-            margin-top: 30px;
-        }
 
-        .metric {
-            font-size: 28px;
-            margin: 15px;
-        }
-        #progressBar {
-    width: 90%;
-    height: 20px;
-    background: #374151;
-    border-radius: 10px;
-    margin: 20px auto;
-}
 
-#progress {
-    width: 0%;
-    height: 100%;
-    border-radius: 10px;
-}
-        .raceView {
-    margin-top: 30px;
-    padding: 20px;
-    border-radius: 20px;
-    text-align: center;
-}
+IRONSIM
+Virtual Ironman Training Simulator
 
-#rider {
-    font-size: 70px;
-}
-    </style>
-</head>
 
-<body>
+    ⚡ Power: -- watts
+    🚴 Cadence: -- RPM
+    💨 Speed: -- MPH
+    📍 Distance: 0 miles
+    🏁 Mile Marker: 0 / 112
 
-<h1>IRONSIM</h1>
+    📍 Current Section: Starting Line
+    🌎 Terrain: Flat
+    💨 Wind: Variable
 
-<p>Virtual Ironman Training Simulator</p>
+    📊 Progress:
+    
+        
+    
 
-<div class="card">
+    ⏱️ Finish Estimate: Calculating...
+    📍 Course: Ironman Maryland
 
-<div class="metric">
-⚡ Power: <span id="power">--</span> watts
-</div>
+    
+        🎮 Mode:
+        
+            Race Mode
+            Training Mode
+            FTP Test
+            Ghost Rider
+            Explore Course
+            Test Mode
+        
+    
 
-<div class="metric">
-🚴 Cadence: <span id="cadence">--</span> RPM
-</div>
+    👻 Ghost Status: Inactive
 
-<div class="metric">
-💨 Speed: <span id="speed">--</span> MPH
-</div>
+    🚴 Bike Connection: Not Connected
+    📡 Data Stream: Offline
+    ⚡ Power Source: Estimated
+    ⚙️ Resistance: 5
 
-<div class="metric">
-📍 Distance: <span id="distance">0</span> miles
-</div>
-<div class="metric">
-🏁 Mile Marker: <span id="mile">0</span> / 112
-</div>
-<div class="metric">
-📍 Current Section:
-<span id="section">Starting Line</span>
-</div>
+    Connect Schwinn IC4
+    Start Ride
 
-<div class="metric">
-🌎 Terrain:
-<span id="terrain">Flat</span>
-</div>
+    ⏱️ Time: 0:00
 
-<div class="metric">
-💨 Wind:
-<span id="wind">Variable</span>
-</div>
-<div class="metric">
-📊 Progress:
-</div>
 
-<div id="progressBar">
-    <div id="progress"></div>
-</div>
 
-<div class="metric">
-⏱️ Finish Estimate:
-<span id="finish">Calculating...</span>
-</div>
-<div class="metric">
-📍 Course: Ironman Maryland
-</div>
-    <div class="metric">
-🎮 Mode:
-<select id="mode">
-    <option>Race Mode</option>
-    <option>Training Mode</option>
-    <option>FTP Test</option>
-    <option>Ghost Rider</option>
-    <option>Explore Course</option>
-    <option>Test Mode</option>
-</select>
-</div>
-    <div class="metric">
-🚴 Bike Connection:
-<span id="bikeStatus">Not Connected</span>
-</div>
-<div class="metric">
-📡 Data Stream:
-<span id="dataStatus">Offline</span>
-</div>
-
-<div class="metric">
-⚡ Power Source:
-<span id="powerSource">Estimated</span>
-</div>
-
-<div class="metric">
-⚙️ Resistance:
-<span id="resistance">5</span>
-</div>
-<button onclick="connectBike()">
-Connect Schwinn IC4
-</button>
-<button onclick="startRide()">
-Start Ride
-</button>
-
-<div class="metric">
-⏱️ Time: <span id="time">0:00</span>
-</div>
-</div>
-<<script src="app.js"></script>
-<script src="bike.js"></script>
-    <div class="raceView">
-
-<h2>🚴 Rider View</h2>
-
-<div id="rider">
-🚴
-</div>
-
-<div class="metric">
-🏁 Race Progress:
-<span id="racePercent">0%</span>
-</div>
-
-</div>
-</body>
-</html>
+    🚴 Rider View
+    🚴
+    🏁 Race Progress: 0%
