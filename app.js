@@ -1,4 +1,4 @@
-// app.js - IronSim Core Engine & Physics
+// app.js - IronSim Core Engine & Bluetooth Data Integration
 
 const ride = {
     power: 0,
@@ -8,6 +8,7 @@ const ride = {
     seconds: 0,
     grade: 0.0,
     running: false,
+    isBluetoothConnected: false,
     course: "Ironman Maryland",
     totalMiles: 112,
     mode: "Race Mode"
@@ -25,40 +26,46 @@ function startRide() {
 }
 
 function calculatePhysicsSpeed(power, grade) {
-    // Base flat speed estimate from watts
+    if (power <= 0) return "0.0";
     let baseSpeed = Math.sqrt(power) * 1.35; 
-    
-    // Grade resistance penalty/boost (-1.2 mph per +1% grade)
     let gradeModifier = grade * 1.2;
     let calculatedSpeed = baseSpeed - gradeModifier;
-
-    // Keep realistic limits (min 4 mph, max 45 mph)
-    return Math.max(4.0, Math.min(45.0, calculatedSpeed)).toFixed(1);
+    return Math.max(0.0, Math.min(45.0, calculatedSpeed)).toFixed(1);
 }
 
 function simulateRide() {
     if (!ride.running) return;
 
-    // Get live grade from course engine
+    // Fetch grade from course engine
     if (typeof getCurrentGrade === "function") {
         ride.grade = getCurrentGrade(ride.distance);
     }
 
-    // Simulated power generation
-    if (ride.mode === "Training Mode") {
-        ride.power = 200;
-    } else if (ride.mode === "FTP Test") {
-        ride.power = Math.floor(240 + Math.random() * 40);
-    } else if (ride.mode === "Ghost Rider") {
-        ride.power = Math.floor(210 + Math.random() * 30);
-    } else {
-        ride.power = Math.floor(180 + Math.random() * 60);
+    // Only generate simulated power if not using live Bluetooth stream or in Test Mode
+    if (!ride.isBluetoothConnected) {
+        if (ride.mode === "Training Mode") {
+            ride.power = 200;
+        } else if (ride.mode === "FTP Test") {
+            ride.power = Math.floor(240 + Math.random() * 40);
+        } else if (ride.mode === "Ghost Rider") {
+            ride.power = Math.floor(210 + Math.random() * 30);
+        } else if (ride.mode === "Test Mode") {
+            ride.power = Math.floor(180 + Math.random() * 60);
+        }
+        
+        if (ride.power > 0 && ride.cadence === 0) {
+            ride.cadence = Math.floor(78 + Math.random() * 16);
+        }
     }
 
-    ride.cadence = Math.floor(78 + Math.random() * 16);
-    ride.speed = calculatePhysicsSpeed(ride.power, ride.grade);
+    // Always calculate real-world physical speed from live Watts + Grade
+    if (ride.power > 0) {
+        ride.speed = calculatePhysicsSpeed(ride.power, ride.grade);
+    } else {
+        ride.speed = "0.0";
+    }
 
-    // Distance multiplier for testing
+    // Distance accumulator
     if (ride.mode === "Test Mode") {
         ride.distance += (Number(ride.speed) / 3600) * 150;
     } else {
@@ -67,7 +74,7 @@ function simulateRide() {
 
     ride.seconds++;
 
-    // Modular updates
+    // UI Updates
     updateDisplay();
     if (typeof updateCourseSection === "function") updateCourseSection();
     if (typeof updateGhostRider === "function") updateGhostRider();
@@ -102,6 +109,8 @@ function updateDisplay() {
         const hours = (ride.totalMiles - ride.distance) / Number(ride.speed);
         const finishMinutes = Math.floor(hours * 60);
         if (finishEl) finishEl.innerText = finishMinutes + " min remaining";
+    } else if (finishEl) {
+        finishEl.innerText = "Pedal to calculate";
     }
 
     const minutes = Math.floor(ride.seconds / 60);
