@@ -1,0 +1,34 @@
+{
+  "modes": [
+    {
+      "id": "race",
+      "name": "Race Mode",
+      "description": "Complete a virtual Ironman course",
+      "goal": "Finish as fast as possible"
+    },
+    {
+      "id": "training",
+      "name": "Training Mode",
+      "description": "Hold a target power",
+      "goal": "Build fitness"
+    },
+    {
+      "id": "ftp",
+      "name": "FTP Test",
+      "description": "Measure your cycling power",
+      "goal": "Find threshold watts"
+    },
+    {
+      "id": "ghost",
+      "name": "Ghost Rider",
+      "description": "Race your previous effort",
+      "goal": "Beat your best time"
+    },
+    {
+      "id": "explore",
+      "name": "Explore Course",
+      "description": "Ride courses without pressure",
+      "goal": "Experience the route"
+    }
+  ]
+}
