@@ -36,6 +36,19 @@
             font-size: 28px;
             margin: 15px;
         }
+        #progressBar {
+    width: 90%;
+    height: 20px;
+    background: #374151;
+    border-radius: 10px;
+    margin: 20px auto;
+}
+
+#progress {
+    width: 0%;
+    height: 100%;
+    border-radius: 10px;
+}
     </style>
 </head>
 
@@ -62,7 +75,22 @@
 <div class="metric">
 📍 Distance: <span id="distance">0</span> miles
 </div>
+<div class="metric">
+🏁 Mile Marker: <span id="mile">0</span> / 112
+</div>
 
+<div class="metric">
+📊 Progress:
+</div>
+
+<div id="progressBar">
+    <div id="progress"></div>
+</div>
+
+<div class="metric">
+⏱️ Finish Estimate:
+<span id="finish">Calculating...</span>
+</div>
 <div class="metric">
 📍 Course: Ironman Maryland
 </div>
