@@ -1,4 +1,4 @@
-// bike.js - Universal Schwinn IC4 / FTMS Bluetooth Driver
+// bike.js - Schwinn IC4 Hex UUID Web Bluetooth Driver
 
 let bluetoothDevice = null;
 let ftmsCharacteristic = null;
@@ -18,17 +18,15 @@ async function connectBike() {
     try {
         if (typeof logMsg === "function") logMsg("Searching for IC4 / FTMS Trainer...");
         
-        // Broader search filter for Schwinn IC4 & standard smart trainers
+        // Exact Hexadecimal UUIDs for FTMS (0x1826) & Cycling Power (0x1818)
         bluetoothDevice = await navigator.bluetooth.requestDevice({
             filters: [
-                { services: ['fitness_machine'] },
-                { services: ['cycling_power'] },
                 { services: [0x1826] },
                 { services: [0x1818] },
                 { namePrefix: 'IC Bike' },
                 { namePrefix: 'Schwinn' }
             ],
-            optionalServices: ['fitness_machine', 'cycling_power', 'cycling_speed_and_cadence', 0x1826, 0x1818, 0x1816, 0x180A]
+            optionalServices: [0x1826, 0x1818, 0x1816, 0x180A]
         });
 
         if (typeof logMsg === "function") logMsg("Found device: " + (bluetoothDevice.name || "Smart Trainer"));
@@ -37,16 +35,16 @@ async function connectBike() {
         if (typeof logMsg === "function") logMsg("Connecting GATT server...");
         const server = await bluetoothDevice.gatt.connect();
 
-        if (typeof logMsg === "function") logMsg("GATT Connected! Locating telemetry service...");
+        if (typeof logMsg === "function") logMsg("GATT Connected! Locating service...");
 
-        // Try Fitness Machine Service (FTMS - 0x1826)
+        // Try Fitness Machine Service (0x1826) first
         let service = null;
         try {
-            service = await server.getPrimaryService('fitness_machine');
-            if (typeof logMsg === "function") logMsg("Connected to FTMS Service!");
+            service = await server.getPrimaryService(0x1826);
+            if (typeof logMsg === "function") logMsg("Connected to FTMS Service (0x1826)!");
         } catch (e) {
-            if (typeof logMsg === "function") logMsg("FTMS not found, falling back to Cycling Power...");
-            service = await server.getPrimaryService('cycling_power');
+            if (typeof logMsg === "function") logMsg("0x1826 not found, falling back to Cycling Power (0x1818)...");
+            service = await server.getPrimaryService(0x1818);
         }
 
         if (service) {
