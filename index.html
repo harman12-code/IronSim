@@ -50,7 +50,7 @@
             border-radius: 5px;
             font-size: 0.8rem;
         }
-        button {
+        button, select {
             background: #0066ff;
             color: #fff;
             border: none;
@@ -70,19 +70,29 @@
             border-radius: 10px;
             overflow: hidden;
         }
-        #simVideo {
+        #streetView, #mapView {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
         .hud-overlay {
             position: absolute;
             top: 15px;
             left: 15px;
-            background: rgba(0, 0, 0, 0.75);
-            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 12px 20px;
             border-radius: 8px;
             border: 1px solid #00ff88;
+            z-index: 10;
+        }
+        .view-controls {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 10;
+            width: 200px;
         }
     </style>
 </head>
@@ -124,12 +134,24 @@
 
         <div class="main-view">
             <div class="card course-container">
-                <!-- Sync Video Stream -->
-                <video id="simVideo" loop muted playsinline src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"></video>
+                <!-- Google Street View Container -->
+                <div id="streetView"></div>
+
+                <!-- Overhead Satellite Map View Container (Hidden initially) -->
+                <div id="mapView" style="display: none;"></div>
                 
+                <!-- HUD Overlay -->
                 <div class="hud-overlay">
                     <h2 style="margin: 0; font-size: 1.2rem; color: #00ff88;">IRONMAN Maryland (Cambridge, MD)</h2>
                     <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Course Progress: <span id="courseProgress">0.00</span> / 112.0 Mi</p>
+                </div>
+
+                <!-- View Toggle Menu -->
+                <div class="view-controls">
+                    <select id="viewModeSelect" onchange="toggleViewMode(this.value)">
+                        <option value="streetview">📸 Street View (1st Person)</option>
+                        <option value="satellite">🛰️ Satellite Map View</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -145,8 +167,23 @@
                 logBox.scrollTop = logBox.scrollHeight;
             }
         }
+
+        function toggleViewMode(mode) {
+            const svEl = document.getElementById("streetView");
+            const mapEl = document.getElementById("mapView");
+            if (mode === "streetview") {
+                svEl.style.display = "block";
+                mapEl.style.display = "none";
+            } else {
+                svEl.style.display = "none";
+                mapEl.style.display = "block";
+            }
+        }
     </script>
+
+    <!-- Google Maps JavaScript API (Loads Street View & Map services) -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=&callback=initCourse" async defer></script>
     <script src="bike.js?v=6"></script>
-    <script src="immd.js?v=1"></script>
+    <script src="immd.js?v=2"></script>
 </body>
 </html>
