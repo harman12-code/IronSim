@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IronSim - IRONMAN Maryland Simulator</title>
+    
+    <!-- Leaflet Map CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -70,29 +74,27 @@
             border-radius: 10px;
             overflow: hidden;
         }
-        #streetView, #mapView {
+        #map {
             width: 100%;
             height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
+            border-radius: 10px;
         }
         .hud-overlay {
             position: absolute;
             top: 15px;
             left: 15px;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             padding: 12px 20px;
             border-radius: 8px;
             border: 1px solid #00ff88;
-            z-index: 10;
+            z-index: 1000;
         }
         .view-controls {
             position: absolute;
             top: 15px;
             right: 15px;
-            z-index: 10;
-            width: 200px;
+            z-index: 1000;
+            width: 220px;
         }
     </style>
 </head>
@@ -134,11 +136,8 @@
 
         <div class="main-view">
             <div class="card course-container">
-                <!-- Google Street View Container -->
-                <div id="streetView"></div>
-
-                <!-- Overhead Satellite Map View Container (Hidden initially) -->
-                <div id="mapView" style="display: none;"></div>
+                <!-- Leaflet Interactive Map Container -->
+                <div id="map"></div>
                 
                 <!-- HUD Overlay -->
                 <div class="hud-overlay">
@@ -146,16 +145,20 @@
                     <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Course Progress: <span id="courseProgress">0.00</span> / 112.0 Mi</p>
                 </div>
 
-                <!-- View Toggle Menu -->
+                <!-- Layer Switcher Controls -->
                 <div class="view-controls">
-                    <select id="viewModeSelect" onchange="toggleViewMode(this.value)">
-                        <option value="streetview">📸 Street View (1st Person)</option>
-                        <option value="satellite">🛰️ Satellite Map View</option>
+                    <select id="mapStyleSelect" onchange="changeMapStyle(this.value)">
+                        <option value="satellite">🛰️ Esri High-Res Satellite</option>
+                        <option value="street">🗺️ OpenStreetMap Standard</option>
+                        <option value="topo">⛰️ Terrain & Topography</option>
                     </select>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Leaflet JS Library (100% Free & Open Source) -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
         const ride = { power: 0, cadence: 0, speed: 0, distance: 0, isBluetoothConnected: false };
@@ -167,23 +170,8 @@
                 logBox.scrollTop = logBox.scrollHeight;
             }
         }
-
-        function toggleViewMode(mode) {
-            const svEl = document.getElementById("streetView");
-            const mapEl = document.getElementById("mapView");
-            if (mode === "streetview") {
-                svEl.style.display = "block";
-                mapEl.style.display = "none";
-            } else {
-                svEl.style.display = "none";
-                mapEl.style.display = "block";
-            }
-        }
     </script>
-
-    <!-- Google Maps JavaScript API (Loads Street View & Map services) -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=&callback=initCourse" async defer></script>
     <script src="bike.js?v=6"></script>
-    <script src="immd.js?v=2"></script>
+    <script src="immd.js?v=3"></script>
 </body>
 </html>
