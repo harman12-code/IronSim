@@ -1,72 +1,90 @@
-// immd.js - Leaflet GPS Course Engine for IRONMAN Maryland
+// immd.js - Smooth 3D & High-Density Route Tracking Engine for IRONMAN Maryland
 
-// IMMD Course Waypoints (Cambridge Start -> Blackwater Wildlife Refuge Loop)
-const immdWaypoints = [
-    [38.5631, -76.0788], // Great Marsh Park / Cambridge
-    [38.5211, -76.0915], // MD-343 South
-    [38.4812, -76.1012], // Approaching Blackwater
-    [38.4522, -76.1051], // Key Wallace Dr Entry
-    [38.4410, -76.0712], // Blackwater Visitor Center
-    [38.4320, -76.0315], // Key Wallace East
-    [38.3811, -76.0511], // Golden Hill Rd South
-    [38.3512, -76.1215], // Decoursey Bridge Rd
-    [38.4011, -76.1522], // Church Creek Turn
-    [38.5022, -76.1112], // Return north to Cambridge
-    [38.5631, -76.0788]  // Finish Loop
+// High-Density IMMD Route Array (Start -> Blackwater Loop -> Finish)
+const rawKeyPoints = [
+    [38.56310, -76.07880], // Start: Great Marsh Park / Cambridge
+    [38.55820, -76.08210], // Hambrooks Blvd
+    [38.54100, -76.08900], // Race St
+    [38.52110, -76.09150], // MD-343 South
+    [38.48120, -76.10120], // MD-16 South
+    [38.45220, -76.10510], // Key Wallace Dr Entry
+    [38.44100, -76.07120], // Blackwater Visitor Center
+    [38.43200, -76.03150], // Key Wallace East
+    [38.38110, -76.05110], // Golden Hill Rd South
+    [38.35120, -76.12150], // Decoursey Bridge Rd
+    [38.40110, -76.15220], // Church Creek Turn
+    [38.50220, -76.11120], // MD-16 North
+    [38.56310, -76.07880]  // Finish: Great Marsh Park
 ];
+
+// Generate dense intermediate points so the rider glides smoothly
+function generateSmoothRoute(points, stepsPerSegment = 50) {
+    let densePath = [];
+    for (let i = 0; i < points.length - 1; i++) {
+        const p1 = points[i];
+        const p2 = points[i + 1];
+        for (let step = 0; step < stepsPerSegment; step++) {
+            const t = step / stepsPerSegment;
+            const lat = p1[0] + (p2[0] - p1[0]) * t;
+            const lng = p1[1] + (p2[1] - p1[1]) * t;
+            densePath.push([lat, lng]);
+        }
+    }
+    densePath.push(points[points.length - 1]);
+    return densePath;
+}
+
+const immdWaypoints = generateSmoothRoute(rawKeyPoints, 100);
 
 let map = null;
 let riderMarker = null;
 let currentLayer = null;
 let tileLayers = {};
-let currentPointIndex = 0;
+let currentPathProgress = 0; // Float index for smooth interpolation
 let totalDistanceMiles = 0;
 let lastFrameTime = performance.now();
-let distanceAccumulator = 0;
 
 function initCourse() {
-    if (typeof logMsg === "function") logMsg("Loading Leaflet Open-Source Satellite Engine...");
+    if (typeof logMsg === "function") logMsg("Initializing Smooth 3D Satellite Course Tracking...");
 
     const startPos = immdWaypoints[0];
 
-    // Initialize Map centered on Cambridge, MD
+    // Initialize Map with smooth animation enabled
     map = L.map('map', {
         center: startPos,
-        zoom: 14,
-        zoomControl: false
+        zoom: 17, // Closer Zwift-style chase camera view
+        zoomControl: false,
+        fadeAnimation: true,
+        markerZoomAnimation: true
     });
 
-    // Define Free Tile Providers
+    // High-Resolution Esri World Imagery (Satellite)
     tileLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
         attribution: 'Tiles &copy; Esri'
     });
 
     tileLayers.street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap'
+        maxZoom: 19
     });
 
-    tileLayers.topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-        attribution: 'Map data &copy; OpenStreetMap'
-    });
-
-    // Default to Satellite
     currentLayer = tileLayers.satellite;
     currentLayer.addTo(map);
 
-    // Draw IMMD Course Route Polyline (Bright Neon Green)
+    // Draw the IMMD Course Route Polyline
     L.polyline(immdWaypoints, {
         color: '#00ff88',
-        weight: 5,
-        opacity: 0.8,
+        weight: 6,
+        opacity: 0.9,
         smoothFactor: 1
     }).addTo(map);
 
-    // Rider Avatar Marker (Neon Cycling Circle)
+    // Glowing Rider Avatar
     const riderIcon = L.divIcon({
         className: 'custom-rider-icon',
-        html: '<div style="background-color: #00ff88; width: 18px; height: 18px; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 0 10px #00ff88;"></div>',
-        iconSize: [24, 24],
-        iconAnchor: [12, 12]
+        html: '<div style="background-color: #00ff88; width: 22px; height: 22px; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 0 15px #00ff88;"></div>',
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
     });
 
     riderMarker = L.marker(startPos, { icon: riderIcon }).addTo(map);
@@ -90,28 +108,41 @@ function updateSimLoop() {
     const currentSpeedMPH = parseFloat(ride.speed) || 0;
 
     if (currentSpeedMPH > 0) {
+        // Calculate incremental distance: Distance = Speed * Time
         const incrementMiles = (currentSpeedMPH / 3600) * dtSeconds;
         totalDistanceMiles += incrementMiles;
-        distanceAccumulator += incrementMiles;
 
-        // Update UI counters
+        // Update UI HUD
         const distEl = document.getElementById("distance");
         const progEl = document.getElementById("courseProgress");
         if (distEl) distEl.innerText = totalDistanceMiles.toFixed(2);
         if (progEl) progEl.innerText = totalDistanceMiles.toFixed(2);
 
-        // Advance rider along path every ~0.01 miles
-        if (distanceAccumulator >= 0.01) {
-            distanceAccumulator = 0;
-            currentPointIndex = (currentPointIndex + 1) % immdWaypoints.length;
-            const nextPos = immdWaypoints[currentPointIndex];
+        // Advance smooth index (Scale based on total route length ~112 miles)
+        const totalPoints = immdWaypoints.length;
+        const speedFactor = (currentSpeedMPH / 112.0) * 0.8; 
+        currentPathProgress += speedFactor * dtSeconds * 10;
 
-            if (riderMarker) {
-                riderMarker.setLatLng(nextPos);
-            }
-            if (map) {
-                map.panTo(nextPos, { animate: true, duration: 0.5 });
-            }
+        if (currentPathProgress >= totalPoints - 1) {
+            currentPathProgress = totalPoints - 1; // Course complete!
+        }
+
+        // Interpolate position between path coordinates
+        const idx = Math.floor(currentPathProgress);
+        const fraction = currentPathProgress - idx;
+        const p1 = immdWaypoints[idx];
+        const p2 = immdWaypoints[Math.min(idx + 1, totalPoints - 1)];
+
+        const interpolatedLat = p1[0] + (p2[0] - p1[0]) * fraction;
+        const interpolatedLng = p1[1] + (p2[1] - p1[1]) * fraction;
+        const currentPos = [interpolatedLat, interpolatedLng];
+
+        // Smoothly glide marker and camera without jumping
+        if (riderMarker) {
+            riderMarker.setLatLng(currentPos);
+        }
+        if (map) {
+            map.panTo(currentPos, { animate: false }); // Smooth continuous panning
         }
     }
 
