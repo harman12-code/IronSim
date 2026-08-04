@@ -1,6 +1,5 @@
-// immd.js - Auto-Routing Engine with OSM Road Snapping for IRONMAN Maryland
+// immd.js - Free OSM Road-Locked Engine for IRONMAN Maryland
 
-// Key waypoints through Cambridge & Blackwater Refuge
 const waypoints = [
     [38.56475, -76.07258], // Start: Great Marsh Park
     [38.56312, -76.08050], // Hambrooks Ave
@@ -21,33 +20,28 @@ const waypoints = [
 
 let map = null;
 let riderMarker = null;
-let tileLayers = {};
-let currentLayer = null;
 let snappedPath = [];
 let totalDistanceMiles = 0;
 let lastFrameTime = performance.now();
 const OFFICIAL_COURSE_MILES = 112.0;
 
-async function fetchSnappedRoads() {
-    if (typeof logMsg === "function") logMsg("Snapping course to real road geometries via OpenStreetMap...");
+async function fetchFreeRoadRoute() {
+    if (typeof logMsg === "function") logMsg("Building free road-locked GPX path...");
 
-    // Build OSRM Routing URL using real road networks
     const coordsStr = waypoints.map(wp => `${wp[1]},${wp[0]}`).join(';');
-    const osrmUrl = `https://router.project-osrm.org/route/v1/biking/${coordsStr}?overview=full&geometries=geojson`;
+    const url = `https://router.project-osrm.org/route/v1/biking/${coordsStr}?overview=full&geometries=geojson`;
 
     try {
-        const response = await fetch(osrmUrl);
+        const response = await fetch(url);
         const data = await response.json();
 
         if (data.routes && data.routes.length > 0) {
-            // Extract the high-density coordinate array that fits the exact road curves
             snappedPath = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-            if (typeof logMsg === "function") logMsg(`Successfully loaded ${snappedPath.length} road-snapped coordinates!`);
+            if (typeof logMsg === "function") logMsg(`Generated ${snappedPath.length} precise road points for free!`);
         } else {
             snappedPath = waypoints;
         }
     } catch (e) {
-        if (typeof logMsg === "function") logMsg("OSRM API fallback used.");
         snappedPath = waypoints;
     }
 
@@ -55,27 +49,18 @@ async function fetchSnappedRoads() {
 }
 
 function initCourse() {
-    const startPos = waypoints[0];
-
     map = L.map('map', {
-        center: startPos,
+        center: waypoints[0],
         zoom: 18,
         zoomControl: false
     });
 
-    tileLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 19,
         attribution: 'Tiles &copy; Esri'
-    });
+    }).addTo(map);
 
-    tileLayers.street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19
-    });
-
-    currentLayer = tileLayers.satellite;
-    currentLayer.addTo(map);
-
-    fetchSnappedRoads();
+    fetchFreeRoadRoute();
 }
 
 function drawCourse() {
@@ -95,14 +80,6 @@ function drawCourse() {
 
         riderMarker = L.marker(snappedPath[0], { icon: riderIcon }).addTo(map);
         requestAnimationFrame(updateSimLoop);
-    }
-}
-
-function changeMapStyle(styleKey) {
-    if (map && tileLayers[styleKey]) {
-        map.removeLayer(currentLayer);
-        currentLayer = tileLayers[styleKey];
-        currentLayer.addTo(map);
     }
 }
 
