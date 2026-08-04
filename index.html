@@ -1,226 +1,152 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>IronSim</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <title>IronSim - IRONMAN Maryland Simulator</title>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: #111827;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0b0f19;
             color: #ffffff;
-            text-align: center;
-            padding: 40px 20px;
             margin: 0;
-        }
-
-        h1 {
-            font-size: 42px;
-            margin-bottom: 5px;
-            letter-spacing: 2px;
-        }
-
-        p { color: #9CA3AF; margin-top: 0; }
-
-        .card {
-            background: #1F2937;
-            border-radius: 20px;
-            padding: 25px;
-            margin: 20px auto;
-            max-width: 550px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
-
-        .metric {
-            font-size: 18px;
-            margin: 12px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #374151;
-            padding-bottom: 8px;
-        }
-
-        .metric span { font-weight: bold; color: #60A5FA; }
-
-        #progressBar {
-            width: 100%;
-            height: 16px;
-            background: #374151;
-            border-radius: 10px;
-            margin: 15px 0;
-            overflow: hidden;
-        }
-
-        #progress {
-            width: 0%;
-            height: 100%;
-            background: #3B82F6;
-            border-radius: 10px;
-            transition: width 0.3s ease;
-        }
-
-        select {
-            background: #374151;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            border: none;
-            font-size: 16px;
-        }
-
-        button {
-            font-size: 18px;
-            font-weight: bold;
-            padding: 12px 24px;
-            border-radius: 12px;
-            border: none;
-            margin: 10px 5px;
-            cursor: pointer;
-            background: #2563EB;
-            color: white;
-        }
-
-        .raceView {
-            background: #1F2937;
-            border-radius: 20px;
             padding: 20px;
-            max-width: 550px;
-            margin: 20px auto;
         }
-
-        canvas {
-            width: 100%;
-            height: 120px;
-            background: #111827;
-            border-radius: 12px;
-            margin-top: 10px;
+        .container {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
         }
-
+        .card {
+            background-color: #151c2c;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .metric-val {
+            font-size: 2.8rem;
+            font-weight: bold;
+            color: #00ff88;
+        }
+        .metric-unit {
+            font-size: 1rem;
+            color: #8a99ad;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
         #logBox {
             background: #000;
-            color: #10B981;
+            color: #00ff88;
             font-family: monospace;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 14px;
-            text-align: left;
-            margin-top: 15px;
-            max-height: 100px;
+            height: 120px;
             overflow-y: auto;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+        }
+        button {
+            background: #0066ff;
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover { background: #0052cc; }
+        .course-container {
+            position: relative;
+            width: 100%;
+            height: 600px;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        #simVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .hud-overlay {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.75);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid #00ff88;
         }
     </style>
 </head>
-
 <body>
+    <h1 style="text-align: center; color: #00ff88;">IronSim: IRONMAN Maryland Bike Simulator</h1>
+    
+    <div class="container">
+        <div class="sidebar">
+            <div class="card">
+                <h3>Bike Telemetry</h3>
+                <button onclick="connectBike()">Connect Schwinn IC4</button>
+                <div id="bikeStatus" style="margin-top: 10px; font-weight: bold; color: #ffcc00;">Not Connected</div>
+                
+                <div class="metrics-grid">
+                    <div>
+                        <div class="metric-unit">POWER</div>
+                        <div class="metric-val"><span id="power">0</span> <span class="metric-unit">W</span></div>
+                    </div>
+                    <div>
+                        <div class="metric-unit">CADENCE</div>
+                        <div class="metric-val"><span id="cadence">0</span> <span class="metric-unit">RPM</span></div>
+                    </div>
+                    <div>
+                        <div class="metric-unit">SPEED</div>
+                        <div class="metric-val"><span id="speed">0.0</span> <span class="metric-unit">MPH</span></div>
+                    </div>
+                    <div>
+                        <div class="metric-unit">DISTANCE</div>
+                        <div class="metric-val"><span id="distance">0.0</span> <span class="metric-unit">MI</span></div>
+                    </div>
+                </div>
+            </div>
 
-    <h1>IRONSIM</h1>
-    <p>Virtual Ironman Training Simulator</p>
-
-    <div class="card">
-        <div class="metric">⚡ Power: <span id="power">--</span> watts</div>
-        <div class="metric">🚴 Cadence: <span id="cadence">--</span> RPM</div>
-        <div class="metric">💨 Speed: <span id="speed">--</span> MPH</div>
-        <div class="metric">📍 Distance: <span id="distance">0</span> miles</div>
-        <div class="metric">🏁 Mile Marker: <span id="mile">0</span> / 112</div>
-
-        <div class="metric">📍 Current Section: <span id="section">Starting Line</span></div>
-        <div class="metric">🌎 Terrain & Grade: <span id="terrain">Flat (0.0%)</span></div>
-        <div class="metric">💨 Wind: <span id="wind">Variable</span></div>
-
-        <div class="metric">📊 Progress:</div>
-        <div id="progressBar">
-            <div id="progress"></div>
+            <div class="card" style="margin-top: 20px;">
+                <h3>System Log</h3>
+                <div id="logBox">Awaiting bike connection...</div>
+            </div>
         </div>
 
-        <div class="metric">⏱️ Finish Estimate: <span id="finish">Calculating...</span></div>
-
-        <div class="metric">
-            🎮 Mode:
-            <select id="mode">
-                <option>Race Mode</option>
-                <option>Training Mode</option>
-                <option>FTP Test</option>
-                <option>Ghost Rider</option>
-                <option>Test Mode</option>
-            </select>
+        <div class="main-view">
+            <div class="card course-container">
+                <!-- Sync Video Stream -->
+                <video id="simVideo" loop muted playsinline src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"></video>
+                
+                <div class="hud-overlay">
+                    <h2 style="margin: 0; font-size: 1.2rem; color: #00ff88;">IRONMAN Maryland (Cambridge, MD)</h2>
+                    <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Course Progress: <span id="courseProgress">0.00</span> / 112.0 Mi</p>
+                </div>
+            </div>
         </div>
-
-        <div class="metric">🚴 Bike Status: <span id="bikeStatus">Disconnected</span></div>
-
-        <button id="connectBtn">Connect Schwinn IC4</button>
-        <button onclick="startRide()">Start Ride</button>
-
-        <div id="logBox">System initialized. Click Connect Schwinn IC4...</div>
-
-        <div class="metric">⏱️ Time: <span id="time">0:00</span></div>
     </div>
-
-    <div class="raceView">
-        <h2>🚵 Course Profile & Live Rider</h2>
-        <canvas id="elevationCanvas" width="500" height="120"></canvas>
-        <div class="metric">🏁 Race Progress: <span id="racePercent">0%</span></div>
-    </div>
-
-   <script src="bike.js?v=5"></script>
-    <script src="course.js"></script>
-    <script src="ghost.js"></script>
-    <script src="app.js"></script>
 
     <script>
-    function logMsg(msg) {
-        const box = document.getElementById("logBox");
-        if (box) {
-            box.innerText = msg + "\n" + box.innerText;
+        const ride = { power: 0, cadence: 0, speed: 0, distance: 0, isBluetoothConnected: false };
+
+        function logMsg(msg) {
+            const logBox = document.getElementById("logBox");
+            if (logBox) {
+                logBox.innerHTML += "<div>" + msg + "</div>";
+                logBox.scrollTop = logBox.scrollHeight;
+            }
         }
-        console.log(msg);
-    }
-
-    document.getElementById("connectBtn").addEventListener("click", function() {
-        logMsg("Button tapped!");
-        if (typeof connectBike === "function") {
-            connectBike();
-        } else {
-            logMsg("ERROR: connectBike function not found in bike.js!");
-        }
-    });
-
-    function drawElevationProfile() {
-        const canvas = document.getElementById("elevationCanvas");
-        if (!canvas) return;
-        const ctx = canvas.getContext("2d");
-        const w = canvas.width;
-        const h = canvas.height;
-
-        ctx.clearRect(0, 0, w, h);
-
-        ctx.beginPath();
-        ctx.moveTo(0, h - 20);
-        for (let x = 0; x <= w; x += 10) {
-            let simDist = (x / w) * 112;
-            let grade = typeof getCurrentGrade === "function" ? getCurrentGrade(simDist) : 0;
-            let y = h - 20 - (grade * 15);
-            ctx.lineTo(x, y);
-        }
-        ctx.strokeStyle = "#60A5FA";
-        ctx.lineWidth = 3;
-        ctx.stroke();
-
-        if (typeof ride !== "undefined") {
-            let riderX = (ride.distance / ride.totalMiles) * w;
-            let riderGrade = typeof getCurrentGrade === "function" ? getCurrentGrade(ride.distance) : 0;
-            let riderY = h - 20 - (riderGrade * 15);
-
-            ctx.beginPath();
-            ctx.arc(riderX, riderY, 8, 0, Math.PI * 2);
-            ctx.fillStyle = "#EF4444";
-            ctx.fill();
-            ctx.strokeStyle = "#FFFFFF";
-            ctx.lineWidth = 2;
-            ctx.stroke();
-        }
-    }
     </script>
-
+    <script src="bike.js?v=6"></script>
+    <script src="immd.js?v=1"></script>
 </body>
 </html>
