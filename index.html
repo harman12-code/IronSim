@@ -136,28 +136,24 @@
 
         <div class="main-view">
             <div class="card course-container">
-                <!-- Leaflet Interactive Map Container -->
                 <div id="map"></div>
                 
-                <!-- HUD Overlay -->
                 <div class="hud-overlay">
                     <h2 style="margin: 0; font-size: 1.2rem; color: #00ff88;">IRONMAN Maryland (Cambridge, MD)</h2>
                     <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Course Progress: <span id="courseProgress">0.00</span> / 112.0 Mi</p>
                 </div>
 
-                <!-- Layer Switcher Controls -->
                 <div class="view-controls">
                     <select id="mapStyleSelect" onchange="changeMapStyle(this.value)">
                         <option value="satellite">🛰️ Esri High-Res Satellite</option>
                         <option value="street">🗺️ OpenStreetMap Standard</option>
-                        <option value="topo">⛰️ Terrain & Topography</option>
                     </select>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Leaflet JS Library (100% Free & Open Source) -->
+    <!-- Leaflet JS Library -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
@@ -172,6 +168,6 @@
         }
     </script>
     <script src="bike.js?v=6"></script>
-    <script src="immd.js?v=3"></script>
+    <script src="immd.js?v=4"></script>
 </body>
 </html>
