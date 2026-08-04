@@ -1,57 +1,85 @@
-// immd.js - IRONMAN Maryland Street View & GPS Navigation Engine
+// immd.js - Leaflet GPS Course Engine for IRONMAN Maryland
 
-// Key GPS route waypoints along the IMMD bike course (Cambridge & Blackwater Refuge)
+// IMMD Course Waypoints (Cambridge Start -> Blackwater Wildlife Refuge Loop)
 const immdWaypoints = [
-    { lat: 38.5631, lng: -76.0788 }, // Cambridge / Great Marsh Start
-    { lat: 38.5211, lng: -76.0915 }, // Route 343 South
-    { lat: 38.4522, lng: -76.1051 }, // Key Wallace Dr Entry
-    { lat: 38.4410, lng: -76.0712 }, // Blackwater Visitor Center
-    { lat: 38.4320, lng: -76.0315 }, // Key Wallace East
-    { lat: 38.3811, lng: -76.0511 }, // Golden Hill Rd South
-    { lat: 38.3512, lng: -76.1215 }  // Decoursey Bridge Rd
+    [38.5631, -76.0788], // Great Marsh Park / Cambridge
+    [38.5211, -76.0915], // MD-343 South
+    [38.4812, -76.1012], // Approaching Blackwater
+    [38.4522, -76.1051], // Key Wallace Dr Entry
+    [38.4410, -76.0712], // Blackwater Visitor Center
+    [38.4320, -76.0315], // Key Wallace East
+    [38.3811, -76.0511], // Golden Hill Rd South
+    [38.3512, -76.1215], // Decoursey Bridge Rd
+    [38.4011, -76.1522], // Church Creek Turn
+    [38.5022, -76.1112], // Return north to Cambridge
+    [38.5631, -76.0788]  // Finish Loop
 ];
 
-let panorama = null;
 let map = null;
+let riderMarker = null;
+let currentLayer = null;
+let tileLayers = {};
 let currentPointIndex = 0;
 let totalDistanceMiles = 0;
 let lastFrameTime = performance.now();
 let distanceAccumulator = 0;
 
 function initCourse() {
-    if (typeof logMsg === "function") logMsg("Initializing Google Street View engine...");
+    if (typeof logMsg === "function") logMsg("Loading Leaflet Open-Source Satellite Engine...");
 
     const startPos = immdWaypoints[0];
 
-    // Initialize Street View Panorama
-    panorama = new google.maps.StreetViewPanorama(
-        document.getElementById('streetView'),
-        {
-            position: startPos,
-            pov: { heading: 180, pitch: 0 },
-            zoom: 1,
-            disableDefaultUI: true,
-            showRoadLabels: false
-        }
-    );
-
-    // Initialize Overhead Satellite Map View
-    map = new google.maps.Map(document.getElementById('mapView'), {
+    // Initialize Map centered on Cambridge, MD
+    map = L.map('map', {
         center: startPos,
         zoom: 14,
-        mapTypeId: 'satellite'
+        zoomControl: false
     });
+
+    // Define Free Tile Providers
+    tileLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri'
+    });
+
+    tileLayers.street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap'
+    });
+
+    tileLayers.topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data &copy; OpenStreetMap'
+    });
+
+    // Default to Satellite
+    currentLayer = tileLayers.satellite;
+    currentLayer.addTo(map);
+
+    // Draw IMMD Course Route Polyline (Bright Neon Green)
+    L.polyline(immdWaypoints, {
+        color: '#00ff88',
+        weight: 5,
+        opacity: 0.8,
+        smoothFactor: 1
+    }).addTo(map);
+
+    // Rider Avatar Marker (Neon Cycling Circle)
+    const riderIcon = L.divIcon({
+        className: 'custom-rider-icon',
+        html: '<div style="background-color: #00ff88; width: 18px; height: 18px; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 0 10px #00ff88;"></div>',
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+    });
+
+    riderMarker = L.marker(startPos, { icon: riderIcon }).addTo(map);
 
     requestAnimationFrame(updateSimLoop);
 }
 
-function computeHeading(p1, p2) {
-    const dLng = (p2.lng - p1.lng) * Math.PI / 180;
-    const lat1 = p1.lat * Math.PI / 180;
-    const lat2 = p2.lat * Math.PI / 180;
-    const y = Math.sin(dLng) * Math.cos(lat2);
-    const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
-    return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+function changeMapStyle(styleKey) {
+    if (map && tileLayers[styleKey]) {
+        map.removeLayer(currentLayer);
+        currentLayer = tileLayers[styleKey];
+        currentLayer.addTo(map);
+    }
 }
 
 function updateSimLoop() {
@@ -72,21 +100,17 @@ function updateSimLoop() {
         if (distEl) distEl.innerText = totalDistanceMiles.toFixed(2);
         if (progEl) progEl.innerText = totalDistanceMiles.toFixed(2);
 
-        // Advance Street View image roughly every ~0.02 miles (~100 feet)
-        if (distanceAccumulator >= 0.02) {
+        // Advance rider along path every ~0.01 miles
+        if (distanceAccumulator >= 0.01) {
             distanceAccumulator = 0;
             currentPointIndex = (currentPointIndex + 1) % immdWaypoints.length;
-            
             const nextPos = immdWaypoints[currentPointIndex];
-            const prevPos = immdWaypoints[(currentPointIndex - 1 + immdWaypoints.length) % immdWaypoints.length];
-            const headingAngle = computeHeading(prevPos, nextPos);
 
-            if (panorama) {
-                panorama.setPosition(nextPos);
-                panorama.setPov({ heading: headingAngle, pitch: 0 });
+            if (riderMarker) {
+                riderMarker.setLatLng(nextPos);
             }
             if (map) {
-                map.setCenter(nextPos);
+                map.panTo(nextPos, { animate: true, duration: 0.5 });
             }
         }
     }
@@ -94,9 +118,6 @@ function updateSimLoop() {
     requestAnimationFrame(updateSimLoop);
 }
 
-// Fallback init trigger
 window.addEventListener("load", () => {
-    if (window.google && window.google.maps) {
-        initCourse();
-    }
+    initCourse();
 });
